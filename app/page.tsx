@@ -29,17 +29,20 @@ import { useTheme } from "next-themes"
 export default function LandingPage() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [user, setUser] = useState<{ name: string } | null>(null)
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
+    // Get user from localStorage
+    const storedUser = localStorage.getItem("user")
+    if (storedUser) {
+      setUser(JSON.parse(storedUser))
+    }
+
     const handleScroll = () => {
-      if (window.scrollY > 10) {
-        setIsScrolled(true)
-      } else {
-        setIsScrolled(false)
-      }
+      setIsScrolled(window.scrollY > 10)
     }
 
     window.addEventListener("scroll", handleScroll)
@@ -104,93 +107,105 @@ export default function LandingPage() {
 
   return (
     <div className="flex min-h-[100dvh] flex-col bg-background">
-      <header
-        className={`sticky top-0 z-50 w-full backdrop-blur-lg transition-all duration-300 ${isScrolled ? "bg-background/80 shadow-sm" : "bg-transparent"}`}
-      >
-        <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center gap-2 font-bold">
-            <div className="size-8 rounded-lg bg-gradient-to-br from-green-700 via-lime-600  to-orange-600 flex items-center justify-center text-primary-foreground">
-              T
-            </div>
-            <span>Tandemly</span>
+    <header
+      className={`sticky top-0 z-50 w-full backdrop-blur-lg transition-all duration-300 ${
+        isScrolled ? "bg-background/80 shadow-sm" : "bg-transparent"
+      }`}
+    >
+      <div className="container flex h-16 items-center justify-between">
+        <div className="flex items-center gap-2 font-bold">
+          <div className="size-8 rounded-lg bg-gradient-to-br from-green-700 via-lime-600 to-blue-500 flex items-center justify-center text-primary-foreground">
+            T
           </div>
-          <nav className="hidden md:flex gap-8">
-            <Link
-              href="#features"
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Features
-            </Link>
-            <Link
-              href="#how-it-works"
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              How It Works
-            </Link>
-            <Link
-              href="#faq"
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              FAQ
-            </Link>
-          </nav>
-          <div className="hidden md:flex gap-4 items-center">
-            <Button variant="ghost" size="icon" onClick={toggleTheme} className="rounded-full">
-              {mounted && theme === "dark" ? <Sun className="size-[18px]" /> : <Moon className="size-[18px]" />}
-              <span className="sr-only">Toggle theme</span>
-            </Button>
-            <Link
-              href="/Login"
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
+          <span>Tandemly</span>
+        </div>
+
+        {/* Desktop nav */}
+        <nav className="hidden md:flex gap-8">
+          <Link href="#features" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+            Features
+          </Link>
+          <Link href="#how-it-works" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+            How It Works
+          </Link>
+          <Link href="#testimonials" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+            Testimonials
+          </Link>
+          <Link href="#faq" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+            FAQ
+          </Link>
+        </nav>
+
+        {/* Desktop user / login */}
+        <div className="hidden md:flex gap-4 items-center">
+          <Button variant="ghost" size="icon" onClick={toggleTheme} className="rounded-full">
+            {theme === "dark" ? <Sun className="size-[18px]" /> : <Moon className="size-[18px]" />}
+          </Button>
+
+          {user ? (
+            <span className="text-sm font-medium text-muted-foreground">Welcome, {user.name}</span>
+          ) : (
+            <Link href="/Login" className="text-sm font-medium text-muted-foreground hover:text-foreground">
               Log in
             </Link>
-            <Button className="rounded-full bg-green-500 hover:bg-green-500/90">
-              Get Started
-              <ChevronRight className="ml-1 size-4" />
-            </Button>
-          </div>
-          <div className="flex items-center gap-4 md:hidden">
-            <Button variant="ghost" size="icon" onClick={toggleTheme} className="rounded-full">
-              {mounted && theme === "dark" ? <Sun className="size-[18px]" /> : <Moon className="size-[18px]" />}
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-              {mobileMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
-              <span className="sr-only">Toggle menu</span>
-            </Button>
-          </div>
+          )}
+
+          <Button className="rounded-full bg-green-500 hover:bg-green-500/90">
+            Get Started
+            <ChevronRight className="ml-1 size-4" />
+          </Button>
         </div>
-        {/* Mobile menu */}
-        {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="md:hidden absolute top-16 inset-x-0 bg-background/95 backdrop-blur-lg border-b"
-          >
-            <div className="container py-4 flex flex-col gap-4">
-              <Link href="#features" className="py-2 text-sm font-medium" onClick={() => setMobileMenuOpen(false)}>
-                Features
-              </Link>
-              <Link href="#how-it-works" className="py-2 text-sm font-medium" onClick={() => setMobileMenuOpen(false)}>
-                How It Works
-              </Link>
-              <Link href="#faq" className="py-2 text-sm font-medium" onClick={() => setMobileMenuOpen(false)}>
-                FAQ
-              </Link>
-              <div className="flex flex-col gap-2 pt-2 border-t">
-                <Link href="#" className="py-2 text-sm font-medium" onClick={() => setMobileMenuOpen(false)}>
+
+        {/* Mobile menu toggle */}
+        <div className="flex items-center gap-4 md:hidden">
+          <Button variant="ghost" size="icon" onClick={toggleTheme} className="rounded-full">
+            {theme === "dark" ? <Sun className="size-[18px]" /> : <Moon className="size-[18px]" />}
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            {mobileMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+          </Button>
+        </div>
+      </div>
+
+      {/* Mobile menu */}
+      {mobileMenuOpen && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          className="md:hidden absolute top-16 inset-x-0 bg-background/95 backdrop-blur-lg border-b"
+        >
+          <div className="container py-4 flex flex-col gap-4">
+            <Link href="#features" className="py-2 text-sm font-medium" onClick={() => setMobileMenuOpen(false)}>
+              Features
+            </Link>
+            <Link href="#how-it-works" className="py-2 text-sm font-medium" onClick={() => setMobileMenuOpen(false)}>
+              How It Works
+            </Link>
+            <Link href="#testimonials" className="py-2 text-sm font-medium" onClick={() => setMobileMenuOpen(false)}>
+              Testimonials
+            </Link>
+            <Link href="#faq" className="py-2 text-sm font-medium" onClick={() => setMobileMenuOpen(false)}>
+              FAQ
+            </Link>
+            <div className="flex flex-col gap-2 pt-2 border-t">
+              {user ? (
+                <span className="py-2 text-sm font-medium">Welcome, {user.name}</span>
+              ) : (
+                <Link href="/Login" className="py-2 text-sm font-medium" onClick={() => setMobileMenuOpen(false)}>
                   Log in
                 </Link>
-                <Button className="rounded-full bg-green-500 hover:bg-green-500/90">
-                  Get Started
-                  <ChevronRight className="ml-1 size-4" />
-                </Button>
-              </div>
+              )}
+              <Button className="rounded-full bg-green-500 hover:bg-green-500/90">
+                Get Started
+                <ChevronRight className="ml-1 size-4" />
+              </Button>
             </div>
-          </motion.div>
-        )}
-      </header>
+          </div>
+        </motion.div>
+      )}
+    </header>
+
       <main className="flex-1">
         {/* Hero Section */}
         <section className="w-full py-20 md:py-32 lg:py-40 overflow-hidden relative">
@@ -211,7 +226,7 @@ export default function LandingPage() {
               </Badge>
               <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight mb-6 text-balance">
                 The complete platform to{" "}
-                <span className="bg-gradient-to-r from-green-500 to-orange-600 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-green-500 to-blue-500 bg-clip-text text-transparent">
                   exchange skills
                 </span>
               </h1>
@@ -403,7 +418,7 @@ export default function LandingPage() {
                   transition={{ duration: 0.5, delay: i * 0.1 }}
                   className="relative z-10 flex flex-col items-center text-center space-y-4"
                 >
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-green-500 to-orange-600 text-primary-foreground text-xl font-bold shadow-lg">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-green-500 to-blue-500 text-primary-foreground text-xl font-bold shadow-lg">
                     {step.step}
                   </div>
                   <h3 className="text-xl font-bold">{step.title}</h3>
@@ -596,7 +611,7 @@ export default function LandingPage() {
         </section>
 
         {/* CTA Section */}
-        <section className="w-full py-20 md:py-32 bg-gradient-to-br from-green-500 to-orange-600 text-primary-foreground relative overflow-hidden">
+        <section className="w-full py-20 md:py-32 bg-gradient-to-br from-green-500 to-blue-500 text-primary-foreground relative overflow-hidden">
           <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
           <div className="absolute -top-24 -left-24 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
           <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
@@ -641,7 +656,7 @@ export default function LandingPage() {
           <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-4">
             <div className="space-y-4">
               <div className="flex items-center gap-2 font-bold">
-                <div className="size-8 rounded-lg bg-gradient-to-br from-green-500 to-orange-600 flex items-center justify-center text-primary-foreground">
+                <div className="size-8 rounded-lg bg-gradient-to-br from-green-500 to-blue-500 flex items-center justify-center text-primary-foreground">
                   T
                 </div>
                 <span>Tandemly</span>
