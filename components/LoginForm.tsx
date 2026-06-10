@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import GoogleIcon from "./ui/GoogleIcon";
+import { API_URL } from "@/lib/api";
 
 export function LoginForm({
   className,
@@ -24,7 +25,7 @@ export function LoginForm({
     setError(null);
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
+      const res = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

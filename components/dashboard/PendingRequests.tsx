@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 
+import { API_URL } from "@/lib/api";
+
 interface RequestUser {
   _id: string;
   name: string;
@@ -44,7 +46,7 @@ export default function PendingRequests() {
         localStorage.getItem("token");
 
       const res = await fetch(
-        "http://localhost:5000/api/matches/received",
+        `${API_URL}/api/matches/received`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -70,7 +72,7 @@ export default function PendingRequests() {
         localStorage.getItem("token");
 
       const res = await fetch(
-        "http://localhost:5000/api/matches/accept",
+        `${API_URL}/api/matches/accept`,
         {
           method: "POST",
 
@@ -114,7 +116,7 @@ export default function PendingRequests() {
         localStorage.getItem("token");
 
       const res = await fetch(
-        "http://localhost:5000/api/matches/reject",
+        `${API_URL}/api/matches/reject`,
         {
           method: "POST",
 

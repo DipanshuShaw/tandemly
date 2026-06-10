@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import UserCard from "./UserCard";
 
 
+import { API_URL } from "@/lib/api";
 
 interface Recommendation {
   user: {
@@ -76,7 +77,7 @@ useEffect(() => {
         skillsRes,
       ] = await Promise.all([
         fetch(
-          "http://localhost:5000/api/matches/recommended",
+          `${API_URL}/api/matches/recommended`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -85,7 +86,7 @@ useEffect(() => {
         ),
 
         fetch(
-          "http://localhost:5000/api/users/profile",
+          `${API_URL}/api/users/profile`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -94,7 +95,7 @@ useEffect(() => {
         ),
 
         fetch(
-          "http://localhost:5000/api/skills",
+          `${API_URL}/api/skills`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

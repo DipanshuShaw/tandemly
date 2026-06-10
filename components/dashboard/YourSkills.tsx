@@ -2,6 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 
+
+import { API_URL } from "@/lib/api";
+
 interface Skill {
   _id: string;
   name: string;
@@ -65,7 +68,7 @@ export default function YourSkills() {
       const [skillsRes, profileRes] =
         await Promise.all([
           fetch(
-            "http://localhost:5000/api/skills",
+            `${API_URL}/api/skills`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -74,7 +77,7 @@ export default function YourSkills() {
           ),
 
           fetch(
-            "http://localhost:5000/api/users/profile",
+            `${API_URL}/api/users/profile`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -107,7 +110,7 @@ export default function YourSkills() {
 
       try {
         await fetch(
-          "http://localhost:5000/api/users/skills/offered",
+          `${API_URL}/api/users/skills/offered`,
           {
             method: "POST",
 
@@ -145,7 +148,7 @@ export default function YourSkills() {
 
       try {
         await fetch(
-          "http://localhost:5000/api/users/skills/wanted",
+          `${API_URL}/api/users/skills/wanted`,
           {
             method: "POST",
 

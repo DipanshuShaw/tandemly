@@ -4,6 +4,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
+import { API_URL } from "@/lib/api";
 
 interface Match {
   _id: string;
@@ -74,7 +75,7 @@ export default function MatchHistory() {
           );
 
         const res = await fetch(
-          "http://localhost:5000/api/matches/history",
+          `${API_URL}/api/matches/history`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -104,7 +105,7 @@ export default function MatchHistory() {
         localStorage.getItem("token");
 
       const res = await fetch(
-        "http://localhost:5000/api/reviews",
+        `${API_URL}/api/reviews`,
         {
           method: "POST",
 

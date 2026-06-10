@@ -3,6 +3,9 @@
 
 import React, { useEffect, useState } from "react";
 
+
+import { API_URL } from "@/lib/api";
+
 interface UserData {
   name: string;
   email: string;
@@ -100,7 +103,7 @@ const YourProfile: React.FC = () => {
     }
 
     fetch(
-      "http://localhost:5000/api/users/profile",
+      `${API_URL}/api/users/profile`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -186,7 +189,7 @@ const YourProfile: React.FC = () => {
 
       try {
         const res = await fetch(
-          "http://localhost:5000/api/users/profile",
+          `${API_URL}/api/users/profile`,
           {
             method: "PUT",
 

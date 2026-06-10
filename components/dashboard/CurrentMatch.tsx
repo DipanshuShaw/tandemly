@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { API_URL } from "@/lib/api";
 
 interface Match {
   _id: string;
@@ -47,7 +48,7 @@ export default function CurrentMatch() {
         localStorage.getItem("token");
 
       const res = await fetch(
-        "http://localhost:5000/api/matches/active",
+        `${API_URL}/api/matches/active`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -75,7 +76,7 @@ export default function CurrentMatch() {
         localStorage.getItem("token");
 
       const res = await fetch(
-        "http://localhost:5000/api/matches/complete",
+        `${API_URL}/api/matches/complete`,
         {
           method: "POST",
 

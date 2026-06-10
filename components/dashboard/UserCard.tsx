@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 
+
+import { API_URL } from "@/lib/api";
+
 interface RecommendationUser {
   _id: string;
   name: string;
@@ -81,7 +84,7 @@ export default function UserCard({
         localStorage.getItem("token");
 
       const res = await fetch(
-        "http://localhost:5000/api/matches/request",
+        `${API_URL}/api/matches/request`,
         {
           method: "POST",
 

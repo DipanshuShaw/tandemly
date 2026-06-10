@@ -6,6 +6,9 @@ import React, {
   useState,
 } from "react";
 
+
+import { API_URL } from "@/lib/api";
+
 interface Transaction {
   _id: string;
   description: string;
@@ -43,7 +46,7 @@ export default function TokenWallet() {
     if (!token) return;
 
     fetch(
-      "http://localhost:5000/api/users/wallet",
+      `${API_URL}/api/users/wallet`,
       {
         headers: {
           Authorization: `Bearer ${token}`,

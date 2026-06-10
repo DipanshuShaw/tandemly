@@ -26,6 +26,8 @@ import TokenWallet from '@/components/dashboard/TokenWallet';
 import Reviews from '@/components/dashboard/Reviews';
 import YourProfile from '@/components/dashboard/YourProfile';
 import { useTheme } from "next-themes"
+import { API_URL } from "@/lib/api";
+
 
 export default function Dashboard() {
     const [isScrolled, setIsScrolled] = useState(false);
@@ -61,7 +63,7 @@ export default function Dashboard() {
             return;
         }
 
-        fetch("http://localhost:5000/api/users/profile", {
+        fetch(`${API_URL}/api/users/profile`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },

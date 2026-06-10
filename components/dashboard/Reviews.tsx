@@ -4,6 +4,7 @@ import React, {
   useState,
 } from "react";
 
+import { API_URL } from "@/lib/api";
 
 interface Review {
   _id: string;
@@ -61,7 +62,7 @@ const fetchData = async () => {
     const [reviewsRes, profileRes] =
       await Promise.all([
         fetch(
-          "http://localhost:5000/api/reviews/me",
+          `${API_URL}/api/reviews/me`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -70,7 +71,7 @@ const fetchData = async () => {
         ),
 
         fetch(
-          "http://localhost:5000/api/users/profile",
+          `${API_URL}/api/users/profile`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
