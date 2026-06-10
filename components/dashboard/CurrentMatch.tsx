@@ -1,89 +1,262 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 
-interface MatchUser {
-  name: string;
-  email: string;
-  bio?: string;
-  number?: string;
-  languages?: string[];
-  skills?: string[]; // optional, if you have skills field
+interface Match {
+  _id: string;
+
+  learner: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+
+  teacher: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+
+  learningSkill: {
+    _id: string;
+    name: string;
+  };
+
+  teachingSkill: {
+    _id: string;
+    name: string;
+  };
+
+  status: string;
+
+  chatEnabled: boolean;
+
+  startedAt: string;
 }
 
-interface CurrentMatchData {
-  user: MatchUser | null;
-  message?: string;
-}
-
-const CurrentMatch: React.FC = () => {
-  const [match, setMatch] = useState<CurrentMatchData | null>(null);
+export default function CurrentMatch() {
+  const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+
+  const [completing, setCompleting] =
+    useState<string | null>(null);
+
+  const fetchMatches = async () => {
+    try {
+      const token =
+        localStorage.getItem("token");
+
+      const res = await fetch(
+        "http://localhost:5000/api/matches/active",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await res.json();
+
+      setMatches(data || []);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCompleteMatch = async (
+    matchId: string
+  ) => {
+    try {
+      setCompleting(matchId);
+
+      const token =
+        localStorage.getItem("token");
+
+      const res = await fetch(
+        "http://localhost:5000/api/matches/complete",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+
+            Authorization: `Bearer ${token}`,
+          },
+
+          body: JSON.stringify({
+            matchId,
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(
+          data.message ||
+            "Failed to complete match"
+        );
+        return;
+      }
+
+      alert("Match completed");
+
+      fetchMatches();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setCompleting(null);
+    }
+  };
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      window.location.href = "/Login";
-      return;
-    }
-
-    fetch("http://localhost:5000/api/user/current-match", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(async (res) => {
-        if (!res.ok) {
-          const errMsg = await res.text();
-          throw new Error(errMsg || "Failed to fetch current match");
-        }
-        return res.json();
-      })
-      .then((data) => setMatch(data))
-      .catch((err: any) => setError(err.message))
-      .finally(() => setLoading(false));
+    fetchMatches();
   }, []);
 
-  if (loading) return <div className="text-center mt-10">Loading current session...</div>;
-  if (error) return <div className="text-center mt-10 text-red-500">{error}</div>;
-  if (!match || !match.user) return <div className="text-center mt-10">No current session found.</div>;
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-48">
+        Loading Active Matches...
+      </div>
+    );
+  }
 
-  const { user } = match;
+  if (matches.length === 0) {
+    return (
+      <div className="p-10 border rounded-2xl text-center">
+        <h2 className="text-xl font-semibold">
+          No Active Matches
+        </h2>
+
+        <p className="text-muted-foreground mt-2">
+          Accept a match request to
+          start learning.
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-4xl mx-auto bg-surface p-8 rounded-2xl shadow-lg">
-      <h2 className="text-3xl font-bold text-text-primary mb-6 border-b border-border pb-4">
-        Current Session
-      </h2>
-      <div className="bg-bg p-6 rounded-2xl border border-border flex flex-col md:flex-row items-center gap-8">
-        <div className="flex-1 text-center md:text-left">
-          <h3 className="text-2xl font-bold text-primary">{user.name}</h3>
-          <p className="text-text-secondary mt-1">{user.bio || "No bio available"}</p>
-          {user.number && (
-            <p className="text-text-secondary mt-1">Phone: {user.number}</p>
-          )}
-          {user.languages && user.languages.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-4 justify-center md:justify-start">
-              {user.languages.map((lang) => (
-                <span
-                  key={lang}
-                  className="px-3 py-1 text-sm font-medium bg-primary-light text-primary-dark-text rounded-full"
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-4xl font-bold">
+          Active Matches
+        </h1>
+
+        <p className="text-muted-foreground mt-2">
+          Manage your ongoing skill
+          exchanges.
+        </p>
+      </div>
+
+      <div className="grid gap-6">
+        {matches.map((match) => (
+          <div
+            key={match._id}
+            className="border rounded-2xl p-6 bg-card shadow-sm"
+          >
+            <div className="flex justify-between items-start">
+              <div>
+                <h2 className="text-xl font-semibold">
+                  Match #
+                  {match._id.slice(-6)}
+                </h2>
+
+                <div className="mt-4 space-y-2">
+                  <p>
+                    <span className="font-medium">
+                      Learner:
+                    </span>{" "}
+                    {match.learner?.name}
+                  </p>
+
+                  <p>
+                    <span className="font-medium">
+                      Teacher:
+                    </span>{" "}
+                    {match.teacher?.name}
+                  </p>
+
+                  <p>
+                    <span className="font-medium">
+                      Learning:
+                    </span>{" "}
+                    {
+                      match.learningSkill
+                        ?.name
+                    }
+                  </p>
+
+                  <p>
+                    <span className="font-medium">
+                      Teaching:
+                    </span>{" "}
+                    {
+                      match.teachingSkill
+                        ?.name
+                    }
+                  </p>
+
+                  <p>
+                    <span className="font-medium">
+                      Status:
+                    </span>{" "}
+                    {match.status}
+                  </p>
+
+                  <p>
+                    <span className="font-medium">
+                      Chat:
+                    </span>{" "}
+                    {match.chatEnabled
+                      ? "Enabled"
+                      : "Disabled"}
+                  </p>
+
+                  <p>
+                    <span className="font-medium">
+                      Started:
+                    </span>{" "}
+                    {new Date(
+                      match.startedAt
+                    ).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <button
+                  disabled
+                  className="px-4 py-2 rounded-lg bg-blue-500 text-white opacity-70"
                 >
-                  {lang}
-                </span>
-              ))}
+                  Chat Coming Soon
+                </button>
+
+                <button
+                  onClick={() =>
+                    handleCompleteMatch(
+                      match._id
+                    )
+                  }
+                  disabled={
+                    completing ===
+                    match._id
+                  }
+                  className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600"
+                >
+                  {completing ===
+                  match._id
+                    ? "Completing..."
+                    : "Complete Match"}
+                </button>
+              </div>
             </div>
-          )}
-        </div>
-        <div className="flex flex-col space-y-3 w-full md:w-auto">
-          <button className="w-full px-6 py-3 bg-primary text-primary-text font-semibold rounded-lg shadow-md hover:opacity-90 transition-transform transform hover:scale-105">
-            Open Chat
-          </button>
-          <button className="w-full px-6 py-3 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 transition-transform transform hover:scale-105">
-            End Session
-          </button>
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   );
-};
-
-export default CurrentMatch;
+}

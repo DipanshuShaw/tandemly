@@ -1,19 +1,24 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import { jwtDecode } from "jwt-decode"; // ✅ Correct import
 
-interface DecodedToken {
-  id: string;
-  email: string;
-  name: string;
-}
+"use client";
+
+import React, { useEffect, useState } from "react";
 
 interface UserData {
   name: string;
   email: string;
   number?: string;
   bio?: string;
+  address?: string;
+
   languages: string[];
+
+  tokens: number;
+
+  rating: number;
+
+  completedSessions: number;
+
+  reliabilityScore: number;
 }
 
 const InputField: React.FC<{
@@ -22,234 +27,454 @@ const InputField: React.FC<{
   type?: string;
   value: string;
   onChange?: (val: string) => void;
-}> = ({ label, id, type = "text", value, onChange }) => (
+}> = ({
+  label,
+  id,
+  type = "text",
+  value,
+  onChange,
+}) => (
   <div>
-    <label htmlFor={id} className="block text-sm font-medium text-text-secondary mb-1">
+    <label
+      htmlFor={id}
+      className="block text-sm font-medium text-text-secondary mb-1"
+    >
       {label}
     </label>
+
     <input
       type={type}
       id={id}
       value={value}
-      onChange={(e) => onChange && onChange(e.target.value)}
+      onChange={(e) =>
+        onChange &&
+        onChange(e.target.value)
+      }
       className="w-full px-4 py-2 border border-border bg-surface rounded-xl shadow-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
     />
   </div>
 );
 
 const YourProfile: React.FC = () => {
-  const [user, setUser] = useState<UserData | null>(null);
-  const [userLanguages, setUserLanguages] = useState<string[]>([]);
-  const [newLanguage, setNewLanguage] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [user, setUser] =
+    useState<UserData | null>(null);
 
+  const [userLanguages, setUserLanguages] =
+    useState<string[]>([]);
 
-    useEffect(() => {
-    let timer: ReturnType<typeof setTimeout> | undefined;    if (message) {
-        timer = setTimeout(() => {
-          setMessage('');
-        }, 5000);
-      }
-  
-      return () => {
-        clearTimeout(timer);
-      };
-    }, [message]);
+  const [newLanguage, setNewLanguage] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [message, setMessage] =
+    useState("");
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    let timer:
+      | ReturnType<
+          typeof setTimeout
+        >
+      | undefined;
+
+    if (message) {
+      timer = setTimeout(() => {
+        setMessage("");
+      }, 5000);
+    }
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [message]);
+
+  useEffect(() => {
+    const token =
+      localStorage.getItem("token");
 
     if (!token) {
-      window.location.href = "/login";
+      window.location.href =
+        "/login";
       return;
     }
 
-    try {
-      const decoded: DecodedToken = jwtDecode(token);
-      console.log("Decoded Token:", decoded);
-
-      fetch("http://localhost:5000/api/user/profile", {
+    fetch(
+      "http://localhost:5000/api/users/profile",
+      {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+      }
+    )
+      .then(async (res) => {
+        if (!res.ok) {
+          throw new Error(
+            "Failed to fetch user data"
+          );
+        }
+
+        return res.json();
       })
-        .then(async (res) => {
-          if (!res.ok) throw new Error("Failed to fetch user data");
-          const data = await res.json();
-          setUser(data);
-          setUserLanguages(data.languages || []);
-        })
-        .catch((err) => console.error("Error fetching user data:", err));
-    } catch {
-      localStorage.removeItem("token");
-      window.location.href = "/login";
-    }
+      .then((data) => {
+        setUser(data);
+
+        setUserLanguages(
+          data.languages || []
+        );
+      })
+      .catch((err) => {
+        console.error(
+          "Error fetching user data:",
+          err
+        );
+      });
   }, []);
 
   const handleAddLanguage = () => {
-    const trimmedLang = newLanguage.trim();
+    const trimmedLang =
+      newLanguage.trim();
+
     if (
       trimmedLang &&
-      !userLanguages.map((l) => l.toLowerCase()).includes(trimmedLang.toLowerCase())
+      !userLanguages
+        .map((l) =>
+          l.toLowerCase()
+        )
+        .includes(
+          trimmedLang.toLowerCase()
+        )
     ) {
-      setUserLanguages([...userLanguages, trimmedLang]);
+      setUserLanguages([
+        ...userLanguages,
+        trimmedLang,
+      ]);
+
       setNewLanguage("");
     }
   };
 
-  const handleRemoveLanguage = (lang: string) => {
-    setUserLanguages(userLanguages.filter((l) => l !== lang));
+  const handleRemoveLanguage = (
+    lang: string
+  ) => {
+    setUserLanguages(
+      userLanguages.filter(
+        (l) => l !== lang
+      )
+    );
   };
 
-  const handleSaveChanges = async () => {
-    if (!user) return;
-    setLoading(true);
-    setMessage("");
+  const handleSaveChanges =
+    async () => {
+      if (!user) return;
 
-    const token = localStorage.getItem("token");
-    if (!token) return window.location.href = "/login";
+      setLoading(true);
 
-    try {
-      const res = await fetch("http://localhost:5000/api/user/profile", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          name: user.name,
-          email: user.email,
-          number: user.number,
-          bio: user.bio,
-          languages: userLanguages,
-        }),
-      });
+      setMessage("");
 
-      const data = await res.json();
+      const token =
+        localStorage.getItem(
+          "token"
+        );
 
-      if (!res.ok) throw new Error(data.message || "Failed to update profile");
+      if (!token) {
+        window.location.href =
+          "/login";
 
-      setMessage("Profile updated successfully!");
-      setUser(data.user || user); // Update local state with new user data
-    } catch (err: any) {
-      setMessage(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+        return;
+      }
 
-  if (!user) return <div className="text-center mt-10 text-lg">Loading user data...</div>;
+      try {
+        const res = await fetch(
+          "http://localhost:5000/api/users/profile",
+          {
+            method: "PUT",
 
+            headers: {
+              "Content-Type":
+                "application/json",
+
+              Authorization: `Bearer ${token}`,
+            },
+
+            body: JSON.stringify({
+              name: user.name,
+
+              email: user.email,
+
+              number:
+                user.number,
+
+              bio: user.bio,
+
+              address:
+                user.address,
+
+              languages:
+                userLanguages,
+            }),
+          }
+        );
+
+        const data =
+          await res.json();
+
+        if (!res.ok) {
+          throw new Error(
+            data.message ||
+              "Failed to update profile"
+          );
+        }
+
+        setMessage(
+          "Profile updated successfully!"
+        );
+
+        setUser(
+          data.user || user
+        );
+      } catch (err: any) {
+        setMessage(
+          err.message
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+if (!user) {
   return (
-    <div className="max-w-4xl mx-auto">
-      <h2 className="text-3xl font-bold text-text-primary mb-6">Your Profile</h2>
-
-      <form
-        className="bg-surface p-8 rounded-2xl shadow-lg space-y-6"
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleSaveChanges();
-        }}
-      >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <InputField
-            label="Full Name"
-            id="name"
-            value={user.name}
-            onChange={(val) => setUser({ ...user, name: val })}
-          />
-          <InputField
-            label="Email Address"
-            id="email"
-            type="email"
-            value={user.email}
-            onChange={(val) => setUser({ ...user, email: val })}
-          />
-          <InputField
-            label="Number"
-            id="number"
-            value={user.number || ""}
-            onChange={(val) => setUser({ ...user, number: val })}
-          />
-        </div>
-
-        {/* Languages */}
-        <div>
-          <label className="block text-sm font-medium text-text-secondary mb-2">Languages</label>
-          <div className="flex flex-wrap gap-2 mb-2 min-h-[40px] ">
-            {userLanguages.map((lang) => (
-              <span
-                key={lang}
-                className="border-2 flex items-center gap-2 bg-primary-light text-primary-dark-text text-sm font-medium px-3 py-1 rounded-full"
-              >
-                {lang}
-                <button type="button" onClick={() => handleRemoveLanguage(lang)} className="focus:outline-none -mr-1 border-2 p-1 rounded-full bg-red-500">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </span>
-            ))}
-          </div>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={newLanguage}
-              onChange={(e) => setNewLanguage(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  handleAddLanguage();
-                }
-              }}
-              placeholder="Add a language"
-              className="flex-grow px-4 py-2 border border-border bg-surface rounded-xl shadow-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
-            />
-            <button
-              type="button"
-              onClick={handleAddLanguage}
-              className="px-5 py-2 bg-primary text-primary-text font-semibold rounded-xl shadow-md hover:opacity-90 transition-opacity"
-            >
-              Add
-            </button>
-          </div>
-        </div>
-
-        {/* Bio */}
-        <div>
-          <label htmlFor="bio" className="block text-sm font-medium text-text-secondary mb-1">
-            Your Bio
-          </label>
-          <textarea
-            id="bio"
-            rows={4}
-            value={user.bio || ""}
-            onChange={(e) => setUser({ ...user, bio: e.target.value })}
-            className="w-full px-4 py-2 border border-border bg-surface rounded-xl shadow-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
-          />
-        </div>
-
-        {message && <p className="text-sm text-green-600">{message}</p>}
-
-        <div className="flex justify-end pt-4">
-          <button
-            type="submit"
-            className="px-8 py-3 bg-primary text-primary-text font-semibold rounded-xl shadow-md hover:opacity-90 transition-opacity"
-            disabled={loading}
-          >
-            {loading ? "Saving..." : "Save Changes"}
-          </button>
-        </div>
-      </form>
+    <div className="text-center mt-10 text-lg">
+      Loading user data...
     </div>
   );
-};
+}
 
-export default YourProfile;
+return (
+  <div className="max-w-4xl mx-auto transition-colors duration-300">
+    {/* PAGE TITLE */}
+    <h2 className="text-3xl font-bold mb-6 text-gray-900 dark:text-gray-100">
+      Your Profile
+    </h2>
+
+    {/* STATS */}
+    <div className="grid md:grid-cols-3 gap-4 mb-6">
+      <div className="p-4 rounded-xl border bg-white dark:bg-gray-900">
+        <p className="text-sm text-muted-foreground">
+          Tokens
+        </p>
+
+        <p className="text-2xl font-bold">
+          {user.tokens}
+        </p>
+      </div>
+
+      <div className="p-4 rounded-xl border bg-white dark:bg-gray-900">
+        <p className="text-sm text-muted-foreground">
+          Rating
+        </p>
+
+        <p className="text-2xl font-bold">
+          {user.rating}
+        </p>
+      </div>
+
+      <div className="p-4 rounded-xl border bg-white dark:bg-gray-900">
+        <p className="text-sm text-muted-foreground">
+          Sessions
+        </p>
+
+        <p className="text-2xl font-bold">
+          {user.completedSessions}
+        </p>
+      </div>
+    </div>
+
+    <form
+      className="
+        p-8 rounded-2xl shadow-lg space-y-6
+        bg-white border border-gray-200
+        dark:bg-gray-900 dark:border-gray-700
+      "
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleSaveChanges();
+      }}
+    >
+      {/* INPUTS */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <InputField
+          label="Full Name"
+          id="name"
+          value={user.name}
+          onChange={(val) =>
+            setUser({
+              ...user,
+              name: val,
+            })
+          }
+        />
+
+        <InputField
+          label="Email Address"
+          id="email"
+          type="email"
+          value={user.email}
+          onChange={(val) =>
+            setUser({
+              ...user,
+              email: val,
+            })
+          }
+        />
+
+        <InputField
+          label="Phone Number"
+          id="number"
+          value={user.number || ""}
+          onChange={(val) =>
+            setUser({
+              ...user,
+              number: val,
+            })
+          }
+        />
+
+        <InputField
+          label="Address"
+          id="address"
+          value={user.address || ""}
+          onChange={(val) =>
+            setUser({
+              ...user,
+              address: val,
+            })
+          }
+        />
+      </div>
+
+      {/* LANGUAGES */}
+      <div>
+        <label className="block text-sm font-medium mb-2">
+          Languages
+        </label>
+
+        <div className="flex flex-wrap gap-2 mb-3">
+          {userLanguages.map((lang) => (
+            <span
+              key={lang}
+              className="
+                flex items-center gap-2
+                px-3 py-1 rounded-full
+                bg-emerald-100
+                text-emerald-700
+              "
+            >
+              {lang}
+
+              <button
+                type="button"
+                onClick={() =>
+                  handleRemoveLanguage(lang)
+                }
+              >
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
+
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newLanguage}
+            placeholder="Add a language"
+            onChange={(e) =>
+              setNewLanguage(
+                e.target.value
+              )
+            }
+            className="
+              flex-1 px-4 py-2 rounded-xl border
+            "
+          />
+
+          <button
+            type="button"
+            onClick={handleAddLanguage}
+            className="
+              px-5 py-2 rounded-xl
+              bg-green-600 text-white
+            "
+          >
+            Add
+          </button>
+        </div>
+      </div>
+
+      {/* BIO */}
+      <div>
+        <label
+          htmlFor="bio"
+          className="block text-sm font-medium mb-1"
+        >
+          Your Bio
+        </label>
+
+        <textarea
+          id="bio"
+          rows={4}
+          value={user.bio || ""}
+          onChange={(e) =>
+            setUser({
+              ...user,
+              bio: e.target.value,
+            })
+          }
+          className="
+            w-full px-4 py-2 rounded-xl border
+          "
+        />
+      </div>
+
+      {/* RELIABILITY */}
+      <div className="p-4 rounded-xl border">
+        <p className="text-sm text-muted-foreground">
+          Reliability Score
+        </p>
+
+        <p className="text-2xl font-bold text-green-500">
+          {user.reliabilityScore}
+        </p>
+      </div>
+
+      {/* MESSAGE */}
+      {message && (
+        <p className="text-green-500">
+          {message}
+        </p>
+      )}
+
+      {/* SAVE BUTTON */}
+      <div className="flex justify-end">
+        <button
+          type="submit"
+          disabled={loading}
+          className="
+            px-8 py-3 rounded-xl
+            bg-green-600 text-white
+          "
+        >
+          {loading
+            ? "Saving..."
+            : "Save Changes"}
+        </button>
+      </div>
+    </form>
+  </div>
+);
+  }
+
+
+
+  export default YourProfile

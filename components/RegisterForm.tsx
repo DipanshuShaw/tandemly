@@ -38,7 +38,7 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"form
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/signup", {
+      const res = await fetch("http://localhost:5000/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -56,7 +56,7 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"form
 
       setSuccess("Account created successfully! Redirecting to dashboard...")
       // redirect after short delay
-      setTimeout(() => router.push("/dashboard"), 1000)
+      setTimeout(() => router.push("/Login"), 1000)
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -67,7 +67,7 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"form
   const handleGoogle = () => alert("Google signup not available")
 
   return (
-    <form className={cn("flex flex-col gap-6", className)} {...props}>
+    <form onSubmit={submitHandler} className={cn("flex flex-col gap-6", className)} {...props}>
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">Create an account</h1>
         <p className="text-muted-foreground text-sm text-balance">
@@ -131,9 +131,13 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"form
 
             <div className="flex justify-between gap-2">
               <Button type="button" onClick={prevStep} variant="outline">Back</Button>
-              <Button type="submit" className="flex-1" disabled={loading} onSubmit={location.href = '/dashboard'}>
+              {/* <Button type="submit" className="flex-1" disabled={loading} onSubmit={location.href = '/dashboard'}>
                 {loading ? "Registering..." : "Submit"}
-              </Button>
+              </Button> */}
+              <button type="submit" className="flex-1" disabled={loading}>
+                {loading ? "Registering..." : "Submit"}
+              </button>
+              
             </div>
           </>
         )}

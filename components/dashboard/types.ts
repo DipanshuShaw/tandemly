@@ -1,42 +1,128 @@
+export interface SkillOffered {
+  _id?: string;
+  skill:
+    | string
+    | {
+        _id: string;
+        name: string;
+        category: string;
+      };
+
+  tokenCost: number;
+  proficiency: string;
+}
+
+export interface SkillWanted {
+  _id?: string;
+  skill:
+    | string
+    | {
+        _id: string;
+        name: string;
+        category: string;
+      };
+
+  priority: string;
+}
 
 export interface User {
-  id: number;
+  _id: string;
+
   name: string;
-  avatarUrl: string;
-  skills: string[];
-  bio: string;
-  isOnline: boolean;
   email: string;
-  phone: string;
+
+  number: string;
+  bio: string;
+
+  profilePicture: string;
+  address: string;
+
   languages: string[];
+
+  tokens: number;
+
+  rating: number;
+  completedSessions: number;
+  reliabilityScore: number;
+
+  skillsOffered: SkillOffered[];
+  skillsWanted: SkillWanted[];
+
+  activeLearning: string[];
+  activeTeaching: string[];
+
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface MatchRecommendation {
+  user: User;
+
+  matchScore: number;
+
+  reasons: string[];
 }
 
 export interface Match {
-  id: number;
-  user: User;
-  date: string;
-  duration: string;
-  status: 'completed' | 'in-progress' | 'pending';
+  _id: string;
+
+  learner: string;
+  teacher: string;
+
+  learningSkill: string;
+  teachingSkill: string;
+
+  status:
+    | "pending"
+    | "active"
+    | "completed"
+    | "cancelled";
+
+  chatEnabled: boolean;
+
+  startedAt: string;
+  endedAt?: string;
+}
+
+export interface MatchRequest {
+  _id: string;
+
+  sender: User;
+  receiver: User;
+
+  teachSkill: string;
+  learnSkill: string;
+
+  status:
+    | "pending"
+    | "accepted"
+    | "rejected";
+
+  createdAt: string;
 }
 
 export interface Message {
-    id: number;
-    userId: number;
-    name: string;
-    avatarUrl: string;
-    text: string;
-    timestamp: string;
-}
+  _id: string;
 
-export interface Skill {
-  id: number;
-  name: string;
+  sender: string;
+  receiver: string;
+
+  content: string;
+
+  createdAt: string;
 }
 
 export interface TokenTransaction {
-    id: number;
-    type: 'purchase' | 'usage';
-    amount: number;
-    date: string;
-    description: string;
+  _id: string;
+
+  type:
+    | "earn"
+    | "spend"
+    | "purchase";
+
+  amount: number;
+
+  description: string;
+
+  createdAt: string;
 }
