@@ -39,6 +39,8 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"form
       return
     }
 
+    console.log("API URL:", process.env.NEXT_PUBLIC_API_URL);
+
     try {
       const res = await fetch(`${API_URL}/api/auth/register`, {
         method: "POST",
