@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Lavender White */
+    --background: 260 33% 98%;
+    /* Deep Ink Violet */
+    --foreground: 249 44% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 249 44% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 249 44% 15%;
+    /* Indigo Ink */
+    --primary: 247 47% 25%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 260 20% 95%;
+    --secondary-foreground: 249 44% 15%;
+    --muted: 260 15% 95%;
+    --muted-foreground: 249 15% 40%;
+    --accent: 260 20% 94%;
+    --accent-foreground: 249 44% 15%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 260 15% 90%;
+    --input: 260 15% 90%;
+    /* Indigo Ink */
+    --ring: 247 47% 25%;
+    --radius: 1rem;
+
+    /* Brand tokens, exposed as CSS vars for anything that needs raw hex */
+    --brand-indigo: #29225e;
+    --brand-amber: #f6a821;
+    --brand-lavender: #faf9fc;
+    --brand-violet: #1b1638;
+  }
+
+  .dark {
+    /* Deep Ink Violet */
+    --background: 249 44% 15%;
+    --foreground: 260 33% 98%;
+    --card: 249 35% 19%;
+    --card-foreground: 260 33% 98%;
+    --popover: 249 35% 19%;
+    --popover-foreground: 260 33% 98%;
+    /* Amber Gold — Indigo Ink loses too much contrast on this dark a surface */
+    --primary: 38 92% 55%;
+    --primary-foreground: 249 44% 15%;
+    --secondary: 249 25% 25%;
+    --secondary-foreground: 260 33% 98%;
+    --muted: 249 25% 22%;
+    --muted-foreground: 260 15% 70%;
+    --accent: 249 25% 25%;
+    --accent-foreground: 260 33% 98%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 249 25% 26%;
+    --input: 249 25% 26%;
+    /* Amber Gold */
+    --ring: 38 92% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+.animate-in {
+  animation: animate-in 0.5s ease-out;
+}
+
+@keyframes animate-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
